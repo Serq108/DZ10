@@ -45,7 +45,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             username=validated_data['username'],
-            is_active = False
+            is_active = False,
+            email = validated_data['email']
         )
         print('SOMEPRINT',validated_data)
         print('SOMEPRINT')
@@ -59,6 +60,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.groups.add(1)
         user.save()
+        if User.objects.filter(username=self.validated_data['username']).exists():
+            send_mail(
+                'Activation on Django', url, 'djangodev108@gmail.com',
+                [validated_data['email']], fail_silently=False
+            )
+        else:
+            print('SOMEPRINT wrong')
         return user
 
     class Meta:
